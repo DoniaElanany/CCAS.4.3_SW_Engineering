@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Profile</title>
+    <meta property="og:title" content="RIP" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="/favicon_io/favicon.ico">
+</head>
+
+<body>
+    <div>
+        <div class="home-container">
+            <!-- Navigation Bar -->
+            <nav-wrapper class="nav-wrapper">
+                <header class="nav-container">
+                    <header class="nav-interactive">
+                        <img alt="E-Learning Platform" src="logo.png" class="nav-logo" />
+                        <div class="nav-desktop-menu">
+                            <nav class="nav-links1">
+                                <a href="home.html">
+                                    <span class="home-text1">Home</span>
+                                </a>
+                                <a href="courses.html">
+                                    <span class="home-text1">Courses</span>
+                                </a>
+                                <a href="/profile">
+                                    <span class="home-text1" style="color: #E65103;">Profile</span>
+                                </a>
+                            </nav>
+                            <div class="nav-buttons1">
+                                <!-- Search Courses Button -->
+                                <button class="nav-action1 button-animated button-filled" onclick="toggleSearchBar()">
+                                    <span class="home-text1">Search Courses</span>
+                                </button>
+                                <!-- Log Out Button -->
+                                <button id="logout-btn" class="nav-action2 button-animated button-outline"
+                                    onclick="logout()" style="display: none;">
+                                    <span class="home-text1">Log Out</span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+                </header>
+            </nav-wrapper>
+
+            <!-- Search Overlay -->
+            <div id="searchOverlay" class="search-overlay" style="display: none;">
+                <div class="search-bar-container">
+                    <button class="close-button" onclick="closeSearchBar()">X</button>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search for courses..."
+                        oninput="filterCourses()">
+                    <ul id="courseList" class="course-list"></ul>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <section class="profile-section">
+                <h2>Welcome, <span id="user-full_name"></span>!</h2>
+                <!-- Profile Card -->
+                <div class="profile-column card">
+                    <h3>Profile:</h3>
+                    <ul>
+                        <li>Email: <span id="user-email"></span></li>
+                        <li>Member Since: <span id="member-since"></span></li>
+                        <li>Role: <span id="role-info"></span></li>
+                    </ul>
+                    <h3>Courses:</h3>
+                    <ul id="course-list">
+                    </ul>
+                    <!-- Update Profile Button -->
+                    <a href="update-profile.html">
+                        <button class="btn-enroll">Update Profile</button>
+                    </a>
+                </div>
+            </section>
+            <!-- Footer Section -->
+            <footer class="update-profile-footer">
+                <p>© 2024 E-Learning Platform. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+
+</html>
