@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Sign Up</title>
+    <meta property="og:title" content="RIP" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="/favicon_io/favicon.ico">
+</head>
+
+<body class="signup-body">
+    <!-- Header Section -->
+    <header class="signup-header">
+        <img alt="E-Learning Platform" src="logo.png" class="signup-logo" />
+    </header>
+    <!-- Main Content Section -->
+    <main>
+        <div class="signup-container">
+            <!-- Signup Form -->
+            <form class="signup-form" action="/signup" method="POST">
+                <h2 class="heading-2">Create an Account</h2>
+                <p>Sign up to start learning</p>
+                <!-- Full Name Input -->
+                <label for="full_name" class="body-large">Full Name</label>
+                <input id="full_name" type="text" name="full_name" placeholder="Enter your full name" required
+                    class="input" />
+                <!-- Email Input -->
+                <label for="email" class="body-large">Email</label>
+                <input id="email" type="email" name="email" placeholder="Enter your email" required class="input" />
+                <!-- Password Input -->
+                <label for="password" class="body-large">Password</label>
+                <input id="password" type="password" name="password" placeholder="Enter your password" required
+                    class="input" minlength="8" />
+                <!-- Confirm Password Input -->
+                <label for="confirm-password" class="body-large">Confirm Password</label>
+                <input id="confirm-password" type="password" name="confirm-password" placeholder="Confirm your password"
+                    required class="input" />
+                <!-- Role Select Dropdown -->
+                <label for="role" class="body-large">I am a</label>
+                <select id="role" name="role" required class="input">
+                    <option value="student">Student</option>
+                    <option value="instructor">Instructor</option>
+                </select>
+                <!-- Sign Up Button -->
+                <button type="submit" class="button-filled login-btn">Sign Up</button>
+                <!-- Login Link -->
+                <div class="login-links">
+                    <p>Already have an account? <a href="login.html">Log in here.</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+    <!-- Footer Section -->
+    <footer class="signup-footer">
+        <p>© 2024 E-Learning Platform. All rights reserved.</p>
+    </footer>
+    <script defer src="scripts.js"></script>
+</body>
+
+</html>

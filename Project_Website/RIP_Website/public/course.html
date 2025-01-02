@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Details</title>
+  <link rel="stylesheet" href="reset.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="/favicon_io/favicon.ico">
+</head>
+
+<body>
+  <div class="home-container">
+    <!-- Navigation bar -->
+    <nav-wrapper class="nav-wrapper">
+      <header class="nav-container">
+        <header class="nav-interactive">
+          <img alt="E-Learning Platform" src="logo.png" class="nav-logo" />
+          <div class="nav-desktop-menu">
+            <nav class="nav-links1">
+              <a href="home.html">
+                <span class="home-text1">Home</span>
+              </a>
+              <a href="courses.html">
+                <span class="home-text1" style="color: #E65103;">Courses</span>
+              </a>
+              <a href="/profile">
+                <span class="home-text1">Profile</span>
+              </a>
+            </nav>
+            <div class="nav-buttons1">
+              <a href="login.html">
+                <button id="auth-btn" class="nav-action2 button-animated button-outline">
+                  <span id="auth-btn-text" class="home-text1">Log In</span>
+                </button>
+              </a>
+            </div>
+          </div>
+        </header>
+      </header>
+    </nav-wrapper>
+
+    <!-- Course details section -->
+    <section class="course-details-section">
+      <div class="course-column card">
+        <h2>Course Details</h2>
+        <h3 id="course-name"></h3>
+        <p><strong>Description:</strong> <span id="course-description"></span></p>
+        <p><strong>Instructor:</strong> <span id="instructor-name"></span></p>
+        <p><strong>Price:</strong> $<span id="course-price"></span></p>
+        <!-- Instructor Controls: visible only to instructors -->
+        <div id="instructor-controls" style="display: none;">
+          <form id="upload-form" enctype="multipart/form-data">
+            <label for="material-upload" class="body-large">Upload Learning Material</label>
+            <input type="file" id="material-upload" name="material" class="input" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+            <br />
+            <div style="margin-bottom: 15px;"></div>
+            <label for="assignment-upload" class="body-large">Upload Assignment</label>
+            <input type="file" id="assignment-upload" name="assignment" class="input"
+              accept=".pdf,.doc,.docx,.ppt,.pptx" />
+            <br />
+            <div style="margin-bottom: 15px;"></div>
+            <label for="due-date" class="body-large">Due Date</label>
+            <input type="datetime-local" id="due-date" name="due-date" class="input" required />
+            <br />
+            <button type="button" onclick="uploadMaterialAndAssignments()" class="button-filled">Upload</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Course learning materials and assignment section -->
+    <section class="course-materials-section">
+      <div class="course-column card">
+        <h2>Learning Materials</h2>
+        <ul id="learning-materials-list" class="login-links">
+        </ul>
+        <h2>Assignments</h2>
+        <ul id="assignments-list" class="login-links">
+        </ul>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="course-page-footer">
+      <p>© 2024 E-Learning Platform. All rights reserved.</p>
+    </footer>
+  </div>
+  <script>
+    // Wait for the DOM to fully load before running the script
+    document.addEventListener('DOMContentLoaded', () => {
+      // Get the course ID from the URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('course_id');
+      let studentId = null;
+
+      // Function to fetch the student ID
+      async function getStudentId() {
+        try {
+          const response = await fetch('/api/getUserId');
+          const data = await response.json();
+          return data.userId;
+        } catch (err) {
+          console.error('Error fetching user ID:', err);
+          return null;
+        }
+      }
+
+      // Function to get the user's role
+      async function getUserRole() {
+        try {
+          const response = await fetch('/api/getUserId');
+          const data = await response.json();
+          return data.role;
+        } catch (err) {
+          console.error('Error fetching user role:', err);
+          return null
+        }
+      }
+
+      // Fetch course details from the server
+      fetch(`/api/course-details?course_id=${courseId}`)
+        .then(response => response.json())
+        .then(async course => {
+          // Populate course details on the page
+          document.getElementById('course-name').textContent = course.course_name;
+          document.getElementById('course-description').textContent = course.description;
+          document.getElementById('instructor-name').textContent = `${course.instructor_name || "N/A"} (${course.instructor_email || "N/A"})`;
+          document.getElementById('course-price').textContent = course.price;
+
+          // Get current user information
+          const userInfo = await fetch('/api/getUserId')
+            .then(response => response.json())
+            .catch(error => {
+              console.error('Error fetching user info:', error);
+              return { userId: null, role: null }
+            });
+          const userId = userInfo.userId;
+          const role = userInfo.role;
+          console.log(`Instructor ID: ${course.instructor_id}, User ID: ${userId}, Role: ${role}`)
+
+          // Display instructor controls if the user is the instructor
+          if (role === 'instructor' && course.instructor_id === userId) {
+            document.getElementById('instructor-controls').style.display = 'block';
+          } else {
+            document.getElementById('instructor-controls').style.display = 'none';
+          }
+
+          // Display learning materials
+          const learningMaterialsList = document.getElementById('learning-materials-list');
+          learningMaterialsList.innerHTML = '';
+          console.log("Learning Materials", course.learningMaterials);
+          if (course.learningMaterials && course.learningMaterials.length > 0) {
+            course.learningMaterials.forEach(material => {
+              console.log('Material Object:', material);
+              const listItem = document.createElement('li');
+              const materialLink = document.createElement('a');
+              materialLink.href = material.file_path ? `/${material.file_path}` : '#';
+              materialLink.textContent = material.title;
+              if (material.file_path) {
+                materialLink.textContent = material.title;
+              } else {
+                materialLink.textContent = `${material.title} (No File Uploaded)`;
+              }
+              listItem.appendChild(materialLink);
+              if (role === 'instructor' && course.instructor_id === userId) {
+                console.log('role is block for remove button')
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remove';
+                removeButton.classList.add('button-outline');
+                removeButton.addEventListener('click', () => {
+                  console.log("Removing material with ID:", material.material_id);
+                  removeMaterial(material.material_id);
+                });
+                listItem.appendChild(removeButton);
+              }
+              learningMaterialsList.appendChild(listItem);
+            });
+          } else {
+            learningMaterialsList.textContent = "No learning materials available for this course.";
+          }
+
+          // Display assignments
+          const assignmentsList = document.getElementById('assignments-list');
+          assignmentsList.innerHTML = '';
+          if (course.assignments && course.assignments.length > 0) {
+            studentId = await getStudentId()
+            fetch(`/api/student-submissions?studentId=${studentId}&courseId=${courseId}`)
+              .then(response => response.json())
+              .then(studentSubmissions => {
+                course.assignments.forEach(assignment => {
+                  const listItem = document.createElement('li');
+                  const assignmentLink = document.createElement('a');
+                  assignmentLink.href = assignment.file_path ? `/${assignment.file_path}` : '#';
+                  if (assignment.file_path) {
+                    assignmentLink.textContent = `${assignment.title}`;
+                  } else {
+                    assignmentLink.textContent = `${assignment.title} (No File Uploaded)`;
+                  }
+                  const dueDateString = assignment.due_date ? new Date(assignment.due_date).toLocaleString() : 'No Due Date';
+                  listItem.textContent += ` Due Date: ${dueDateString}`;
+                  const submission = studentSubmissions.find(sub => sub.assignment_id === assignment.assignment_id);
+
+                  if (submission) {
+                    const submissionLink = document.createElement('a');
+                    const grade = document.createElement('span');
+                    grade.textContent = ` Grade: ${submission.grade || 'Not Graded'}`;
+                    submissionLink.href = `/${submission.file_path}`;
+                    submissionLink.textContent = `Submitted: ${submission.submission_title}`;
+                    listItem.appendChild(assignmentLink);
+                    listItem.appendChild(submissionLink);
+                    listItem.appendChild(grade);
+                    let role = document.getElementById('instructor-controls').style.display
+                    if (role === 'block') {
+                      const gradeForm = document.createElement('form');
+                      gradeForm.id = `grade-form-${submission.submission_id}`
+                      const gradeInput = document.createElement('input');
+                      gradeInput.type = 'number';
+                      gradeInput.placeholder = 'Enter Grade';
+                      gradeInput.classList.add('input');
+                      gradeInput.name = 'grade';
+                      const gradeButton = document.createElement('button');
+                      gradeButton.textContent = submission.grade ? 'Adjust Grade' : 'Grade Submission';
+                      gradeButton.classList.add('button-filled');
+                      gradeButton.type = "button"
+                      gradeButton.addEventListener('click', () => {
+                        gradeSubmission(submission.submission_id, gradeInput.value)
+                      })
+                      gradeForm.appendChild(gradeInput)
+                      gradeForm.appendChild(gradeButton)
+                      listItem.appendChild(gradeForm);
+                    }
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'Remove Submission';
+                    removeButton.classList.add('button-outline')
+                    removeButton.addEventListener('click', () => {
+                      removeSubmission(assignment.assignment_id, studentId);
+                    });
+                    if (document.getElementById('instructor-controls').style.display !== 'block') {
+                      listItem.appendChild(removeButton);
+                    }
+                  } else {
+                    listItem.appendChild(assignmentLink);
+                    if (document.getElementById('instructor-controls').style.display !== 'block') {
+                      const submissionForm = document.createElement('form');
+                      submissionForm.enctype = "multipart/form-data"
+                      submissionForm.id = `submission-form-${assignment.assignment_id}`;
+                      const fileInput = document.createElement('input');
+                      fileInput.type = 'file';
+                      fileInput.name = 'submission';
+                      fileInput.accept = ".pdf,.doc,.docx";
+                      fileInput.classList.add('input')
+                      submissionForm.appendChild(fileInput)
+                      const submitButton = document.createElement('button')
+                      submitButton.textContent = "Submit Assignment"
+                      submitButton.classList.add('button-filled');
+                      submitButton.type = "button"
+                      submitButton.addEventListener('click', () => {
+                        submitAssignment(assignment.assignment_id, submissionForm)
+                      })
+                      submissionForm.appendChild(submitButton);
+                      listItem.appendChild(submissionForm);
+                    }
+                  }
+                  let role = document.getElementById('instructor-controls').style.display;
+                  if (role === 'block') {
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'Remove';
+                    removeButton.classList.add('button-outline');
+                    removeButton.addEventListener('click', () => {
+                      removeAssignment(assignment.assignment_id);
+                    });
+                    listItem.appendChild(removeButton)
+                  }
+                  assignmentsList.appendChild(listItem);
+                });
+              });
+          } else {
+            assignmentsList.textContent = 'No assignments available for this course';
+          }
+        })
+        .catch(error => console.error('Error fetching course details:', error));
+
+      // Logout function
+      function logout() {
+        fetch('/api/logout', {
+          method: 'POST',
+          credentials: 'include'
+        })
+          .then(response => {
+            if (response.ok) {
+              window.location.href = 'home.html';
+            } else {
+              alert('Logout failed. Please try again.');
+            }
+          })
+          .catch(err => {
+            console.error('Error during logout:', err);
+            alert('An error occurred. Please try again.');
+          });
+      }
+      // Event listener for logout button
+      document.getElementById('logout-btn').addEventListener('click', logout);
+    });
+
+    // Function to handle material and assignment uploads
+    async function uploadMaterialAndAssignments() {
+      const courseId = new URLSearchParams(window.location.search).get('course_id');
+      const materialInput = document.getElementById('material-upload');
+      const assignmentInput = document.getElementById('assignment-upload');
+      const dueDateInput = document.getElementById('due-date');
+      const formData = new FormData();
+      if (materialInput.files.length > 0) {
+        formData.append('material', materialInput.files[0]);
+      }
+      if (assignmentInput.files.length > 0) {
+        formData.append('assignment', assignmentInput.files[0]);
+      }
+      formData.append('course_id', courseId);
+      formData.append('due_date', dueDateInput.value)
+      try {
+        const response = await fetch('/api/upload-material', {
+          method: 'POST',
+          body: formData,
+        });
+        if (response.ok) {
+          alert('Files uploaded successfully!');
+          window.location.reload()
+        } else {
+          const errorText = await response.text()
+          alert(`Error uploading files: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error during file upload:', error);
+        alert('Failed to upload files due to network error.');
+      }
+    }
+
+    // Function to handle student assignment submission
+    async function submitAssignment(assignmentId, formElement) {
+      const studentId = await getStudentId();
+      const formData = new FormData(formElement);
+      formData.append('assignment_id', assignmentId);
+      formData.append('student_id', studentId);
+      try {
+        const response = await fetch('/api/submit-assignment', {
+          method: 'POST',
+          body: formData,
+        });
+        if (response.ok) {
+          alert('Assignment submitted successfully!');
+          window.location.reload();
+        } else {
+          const errorText = await response.text()
+          alert(`Error submitting assignment: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error submitting assignment:', error);
+        alert('Failed to submit assignment due to network error.');
+      }
+    }
+
+    // Function to remove a student's assignment submission
+    async function removeSubmission(assignmentId, studentId) {
+      try {
+        const response = await fetch('/api/remove-submission', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `assignment_id=${assignmentId}&student_id=${studentId}`
+        });
+        if (response.ok) {
+          alert('Submission removed successfully!');
+          window.location.reload();
+        } else {
+          const errorText = await response.text();
+          alert(`Failed to remove submission: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error removing submission', error);
+        alert('Failed to remove submission due to network error.');
+      }
+    }
+
+    // Function to remove a learning material
+    async function removeMaterial(materialId) {
+      try {
+        const response = await fetch('/api/remove-material', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `material_id=${materialId}`,
+        });
+        if (response.ok) {
+          alert('Material removed successfully!');
+          window.location.reload();
+        } else {
+          const errorText = await response.text();
+          alert(`Failed to remove material: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error removing material:', error);
+        alert('Failed to remove material due to network error.');
+      }
+    }
+
+    // Function to remove an assignment
+    async function removeAssignment(assignmentId) {
+      try {
+        const response = await fetch('/api/remove-assignment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `assignment_id=${assignmentId}`
+        });
+        if (response.ok) {
+          alert('Assignment removed successfully!');
+          window.location.reload();
+        } else {
+          const errorText = await response.text();
+          alert(`Failed to remove assignment: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error removing assignment:', error)
+        alert('Failed to remove assignment due to network error.');
+      }
+    }
+
+    // Function to grade a student's submission
+    async function gradeSubmission(submissionId, grade) {
+      try {
+        const response = await fetch('/api/grade-submission', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `submission_id=${submissionId}&grade=${grade}`
+        });
+        if (response.ok) {
+          alert('Submission graded successfully!');
+          window.location.reload();
+        } else {
+          const errorText = await response.text()
+          alert(`Failed to grade submission: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error grading submission', error);
+        alert('Failed to grade submission due to network error.');
+      }
+    }
+
+    // Function to fetch the student ID
+    async function getStudentId() {
+      const response = await fetch('/api/getUserId');
+      const data = await response.json();
+      return data.userId;
+    }
+  </script>
+  <script defer src="scripts.js"></script>
+</body>
+
+</html>

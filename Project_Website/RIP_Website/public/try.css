@@ -1,0 +1,187 @@
+/*-----------------------------------------------------------------------------------------------*/
+/* Existing styles */
+/*-----------------------------------------------------------------------------------------------*/
+/* Hero section styles (if any) */
+.home-container{
+    background-color: #f9f9f9
+  }
+  /* General section styles (if any) */
+  
+  .course-details-section,
+  .course-materials-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+  }
+  /*-----------------------------------------------------------------------------------------------*/
+  /* Navigation bar */
+  /*-----------------------------------------------------------------------------------------------*/
+  
+  .nav-container {
+      background-color: #fbf1eb; /* Soft off-white background for navbar */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .nav-links1 a,
+  .nav-buttons1 button {
+     font-weight: 600; /* Bold but readable font weight */
+  }
+  /*-----------------------------------------------------------------------------------------------*/
+  /* Course Column Styles */
+  /*-----------------------------------------------------------------------------------------------*/
+  
+  .course-column {
+      background-color: #fff; /* white background*/
+      border: 1px solid #f0e6ef; /* Subtle border */
+      border-radius: 8px; /* Rounded corners */
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Very light shadow */
+      margin-bottom: 20px; /* Added margin below card */
+      line-height: 1.7;
+  }
+  
+  .course-column h2 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #333;
+      text-align: left;
+  
+  }
+  
+  .course-column h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #444;
+      text-align: left;
+  }
+  
+  .course-column p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 10px;
+          text-align: left;
+  
+  }
+  
+  /*-----------------------------------------------------------------------------------------------*/
+  /* Learning material/assignment styles */
+  /*-----------------------------------------------------------------------------------------------*/
+  #learning-materials-list {
+    padding-left: 20px; /* Indent learning material list items */
+}
+
+#learning-materials-list li {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+    border: 1px solid  #f0e6ef;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: baseline; /* Changed to baseline */
+    margin-left: 5px; /* Reduced margin to tighten the bullet point */
+     padding-left: 10px;
+}
+
+#learning-materials-list li:hover {
+   background-color: #fbf1eb;
+}
+
+#learning-materials-list li::marker {
+    margin-left: -10px;
+}
+
+#assignments-list {
+   padding-left: 20px; /* Indent learning material list items */
+}
+
+#assignments-list li {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+    border: 1px solid  #f0e6ef;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: baseline;
+    margin-left: 5px; /* Reduced margin to tighten the bullet point */
+     padding-left: 10px;
+}
+
+#assignments-list li:hover {
+   background-color: #fbf1eb;
+}
+
+#assignments-list li::marker{
+     margin-left: -10px;
+}
+
+#assignments-list li a{
+    display: block;
+}
+.remove-course-btn{
+    padding: 5px 10px;
+    margin-left: 10px;
+}
+  
+  /*-----------------------------------------------------------------------------------------------*/
+  /* Button styles  */
+  /*-----------------------------------------------------------------------------------------------*/
+  .button-outline {
+    gap: var(--dl-space-space-halfunit);
+    fill: var(--dl-color-theme-primary1);
+    color: var(--dl-color-theme-primary1);
+    border: 1px solid;
+    cursor: pointer;
+    display: flex;
+    transition: 0.3s;
+    align-items: center;
+    font-weight: bold;
+    padding-top: var(--dl-space-space-halfunit);
+    white-space: nowrap;
+    border-color: var(--dl-color-theme-primary1);
+    padding-left: var(--dl-space-space-oneandhalfunits);
+    border-radius: var(--dl-radius-radius-buttonradius);
+    padding-right: var(--dl-space-space-oneandhalfunits);
+    padding-bottom: var(--dl-space-space-halfunit);
+    justify-content: center;
+  }
+  
+  .button-outline:hover {
+    fill: var(--dl-color-theme-secondary2);
+    color: var(--dl-color-theme-secondary2);
+    border-color: var(--dl-color-theme-primary2);
+    background-color: var(--dl-color-theme-primary2);
+  }
+  
+  .button-filled {
+    gap: var(--dl-space-space-halfunit);
+    fill: var(--dl-color-theme-secondary1);
+    color: var(--dl-color-theme-secondary1);
+    cursor: pointer;
+    display: flex;
+    transition: 0.3s;
+    align-items: center;
+    font-weight: bold;
+    padding-top: var(--dl-space-space-halfunit);
+    white-space: nowrap;
+    border-color: var(--dl-color-theme-primary1);
+    border-width: 1px;
+    padding-left: var(--dl-space-space-oneandhalfunits);
+    border-radius: var(--dl-radius-radius-buttonradius);
+    padding-right: var(--dl-space-space-oneandhalfunits);
+    padding-bottom: var(--dl-space-space-halfunit);
+    justify-content: center;
+    background-color: var(--dl-color-theme-primary1);
+  }
+  
+  .button-filled:hover {
+    fill: var(--dl-color-theme-secondary2);
+    color: var(--dl-color-theme-secondary2);
+    border-color: var(--dl-color-theme-primary2);
+    background-color: var(--dl-color-theme-primary2);
+  }
+
+  
