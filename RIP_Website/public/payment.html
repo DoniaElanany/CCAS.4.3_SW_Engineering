@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Payment</title>
+    <meta property="og:title" content="RIP" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="/favicon_io/favicon.ico">
+</head>
+
+<body class="payment-body">
+    <!-- Header Section -->
+    <header class="payment-header">
+        <img alt="E-Learning Platform" src="logo.png" class="payment-logo" />
+    </header>
+
+    <!-- Main Content Section -->
+    <main>
+        <div class="payment-container">
+            <!-- Payment Form -->
+            <form id="payment-form" class="payment-form" action="/submit-payment" method="POST"
+                onsubmit="return validateForm()">
+                <h2 class="heading-2">Payment Information</h2>
+                <p class="body-small">Please provide your payment details below.</p>
+                <!-- Course Select Dropdown -->
+                <label for="course" class="body-large">Select a Course</label>
+                <select id="course" name="course" required class="input"></select>
+                <!-- Hidden Price Input -->
+                <input type="hidden" id="price" name="price" />
+                <!-- Card Number Input -->
+                <label for="card-number" class="body-large">Card Number</label>
+                <input type="text" id="card-number" name="card-number" placeholder="Enter your card number" required
+                    class="input" pattern="[0-9]{16}" title="Card number must be 16 digits" />
+                <!-- Expiry Date Input -->
+                <label for="expiry-date" class="body-large">Expiry Date</label>
+                <input type="text" id="expiry-date" name="expiry-date" placeholder="MM/YY" required class="input"
+                    pattern="(0[1-9]|1[0-2])\/[0-9]{2}" title="Expiry date must be in MM/YY format" />
+                <!-- CVV Input -->
+                <label for="cvv" class="body-large">CVV</label>
+                <input type="text" id="cvv" name="cvv" placeholder="Enter your CVV" required class="input"
+                    pattern="[0-9]{3,4}" title="CVV must be 3 or 4 digits" />
+                <!-- Billing Address Input -->
+                <label for="billing-address" class="body-large">Billing Address</label>
+                <input type="text" id="billing-address" name="billing-address" placeholder="Enter your billing address"
+                    required class="input" />
+                <!-- Submit Payment Button -->
+                <button type="submit" class="button-filled payment-btn">Submit Payment</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="payment-footer">
+        <p>© 2024 E-Learning Platform. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to validate expiry date, ensuring it's in the future
+        function validateForm() {
+            const expiryDateInput = document.getElementById('expiry-date');
+            const expiryDate = expiryDateInput.value;
+            if (!expiryDate) {
+                alert('Please enter an expiry date.');
+                return false;
+            }
+            const [month, year] = expiryDate.split('/').map(Number);
+            const expiry = new Date(`20${year}`, month - 1, 1);
+
+            const now = new Date();
+            if (expiry <= now) {
+                alert('Expiry date must be in the future.');
+                return false;
+            }
+            return true;
+        }
+        // Event listener to load courses and set up payment form functionality on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            const courseSelect = document.getElementById('course');
+            const priceInput = document.getElementById('price');
+            const paymentForm = document.getElementById('payment-form');
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedCourseId = urlParams.get('course_id');
+            // Fetch courses from the server
+            fetch('/courses/list')
+                .then(response => response.json())
+                .then(courses => {
+                    // Clear any existing options in the course dropdown
+                    courseSelect.innerHTML = `<option value="" disabled selected>Select a course</option>`;
+                    //Handle case of no courses
+                    if (!Array.isArray(courses) || courses.length === 0) {
+                        const noCoursesOption = document.createElement('option');
+                        noCoursesOption.value = '';
+                        noCoursesOption.disabled = true;
+                        noCoursesOption.textContent = 'No courses available';
+                        courseSelect.appendChild(noCoursesOption);
+                        return;
+                    }
+                    // Populate the course dropdown with options
+                    courses.forEach(course => {
+                        const option = document.createElement('option');
+                        option.value = course.course_id;
+                        option.textContent = `${course.course_name} - $${parseFloat(course.price).toFixed(2)}`;
+                        courseSelect.appendChild(option);
+                        // Select pre-selected course if course id is passed as url parameter
+                        if (selectedCourseId && course.course_id == selectedCourseId) {
+                            option.selected = true;
+                            priceInput.value = course.price;
+                        }
+                    });
+                    // Event listener to update price when course is selected
+                    courseSelect.addEventListener('change', () => {
+                        const selectedCourse = courses.find(course => course.course_id == courseSelect.value);
+                        if (selectedCourse) {
+                            priceInput.value = selectedCourse.price;
+                        }
+                    });
+                })
+                .catch(err => {
+                    console.error('Error fetching courses:', err);
+                    courseSelect.innerHTML = `<option value="" disabled selected>Error loading courses</option>`;
+                });
+            // Fetch user id to verify user is authenticated
+            fetch('/api/getUserId')
+                .then(response => response.json())
+                .then(data => {
+                    // Add hidden field containing userId if authenticated
+                    if (data.userId) {
+                        const studentIdField = document.createElement('input');
+                        studentIdField.type = 'hidden';
+                        studentIdField.name = 'student-id';
+                        studentIdField.value = data.userId;
+                        paymentForm.appendChild(studentIdField);
+                    } else {
+                        // Redirect to login if not authenticated
+                        console.error('User not authenticated.');
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(err => {
+                    // Redirect to login if there is an issue
+                    console.error('Error fetching user ID:', err);
+                    window.location.href = '/login';
+                });
+        });
+    </script>
+</body>
+
+</html>
