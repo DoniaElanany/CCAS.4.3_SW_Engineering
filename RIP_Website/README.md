@@ -49,21 +49,6 @@ Before you begin, make sure you have the following installed on your system:
         });
         ```
 
-<!-- 4.  **Email Configuration:**
-
-    -   Update your Gmail credentials for sending emails (e.g. password reset and payment confirmation) in the `sendResetEmail` and `sendInvoiceEmail` functions of the `server.js`:
-
-        ```javascript
-         const transporter = nodemailer.createTransport({
-             service: 'Gmail',
-             auth: {
-                 user: 'rip.elearning.platform@gmail.com', // Your Gmail account address
-                 pass: 'wsqe ffjg kdxw gnzg', // Your Gmail password for application
-             },
-         });
-        ```
-        
-        **NOTE**: You may need to enable "less secure app access" in your Gmail account settings, or preferably create an app password if using 2FA. -->
 4. **Database Setup**
     - Before running the project, you'll need to set up the database schema. Run the following SQL queries in your MySQL database to create the necessary tables: 
 
@@ -145,6 +130,7 @@ Before you begin, make sure you have the following installed on your system:
         `title` varchar(255) NOT NULL,
         `description` text,
         `due_date` timestamp NULL DEFAULT NULL,
+        `maximum_grade` int DEFAULT NULL,
         `file_path` varchar(255) DEFAULT NULL,
         PRIMARY KEY (`assignment_id`),
         KEY `course_id` (`course_id`),
@@ -189,7 +175,7 @@ The project structure is organized as follows:
     -   `style.css` holds the main styles for the platform.
     -   `scripts.js` contains JavaScript code for client-side interactions.
 -   `server.js`: Contains the server-side logic using Node.js and Express.js, including routing, database interactions, user authentication, and payment processing.
--   `uploads/`: Stores uploaded learning materials and assignment submissions. This directory is generated at runtime if it doesn't exist.
+-   `uploads/`: Stores uploaded learning materials and assignment submissions. 
 
 ## API Endpoints
 
@@ -204,17 +190,18 @@ Here's a breakdown of the main API endpoints in `server.js`:
     -   `GET /api/profile`: Fetches the current user's profile data and enrolled courses.
     -   `POST /submit-profile-update`: Updates the current user's profile.
     -   `GET /api/getUserId`: Gets user Id
-    -    `GET /api/instructor-courses`: Gets courses taught by an instructor.
+    -   `GET /api/instructor-courses`: Gets courses taught by an instructor.
 -   **Courses:**
     -   `GET /courses/list`: Lists all courses.
-     -   `GET /api/courses`: Lists all course name and ids.
+    -   `GET /api/courses`: Lists all course name and ids.
     -   `GET /api/course-details`: Fetches details of a specific course, including materials and assignments.
 -    **Payments:**
-        -   `POST /submit-payment`: Processes a payment and enrolls a student in a course.
+    -   `POST /submit-payment`: Processes a payment and enrolls a student in a course.
 -   **Learning Materials and Assignments:**
     -   `POST /api/upload-material`: Uploads learning materials and assignments (instructors only).
     -   `POST /api/submit-assignment`: Submits an assignment (students only).
     -   `GET /api/student-submissions`: Fetches a student's submissions for a specific course.
+    -   `GET /api/all-student-submissions-by-assignment`: Fetches all student submissions for a specific assignment, along with user details (instructors only).
     -    `POST /api/remove-submission`: Removes student submissions.
     -    `POST /api/grade-submission`: Grades student submissions.
     -   `POST /api/remove-material`: Removes learning material.

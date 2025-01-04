@@ -303,7 +303,7 @@ app.post('/submit-profile-update', checkLoggedIn, (req, res) => {
                             return console.error('Error removing courses from enrollments:', err);
                         }
                     });
-                } 
+                }
             }
         }
         res.redirect('/profile'); // Redirect after updating
@@ -775,7 +775,7 @@ app.get('/api/course-details', checkLoggedIn, (req, res) => {
                 });
             }
             // Get the assignments for a given course
-            const assignmentQuery = `SELECT assignment_id, title, description, file_path, due_date FROM assignments WHERE course_id = ?`;
+            const assignmentQuery = `SELECT assignment_id, title, description, file_path, due_date, maximum_grade FROM assignments WHERE course_id = ?`; // Include maximum_grade
             db.query(assignmentQuery, [courseId], (err, assignments) => {
                 if (err) {
                     console.error('Error fetching assignments:', err);
@@ -821,6 +821,7 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
     const materialFile = req.files && req.files['material'] ? req.files['material'][0] : null;
     const assignmentFile = req.files && req.files['assignment'] ? req.files['assignment'][0] : null;
     const dueDate = req.body['due_date'];
+    const maximumGrade = req.body['maximum_grade']; // Get the maximum grade
 
     if (!courseId) {
         return res.status(400).send('Course ID is required');
@@ -850,8 +851,8 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
         // Insert assignment if a file is present
         if (assignmentFile) {
             const relativeAssignmentPath = path.relative(__dirname, assignmentFile.path);
-            const assignmentQuery = `INSERT INTO assignments (course_id, title, description, file_path, due_date) VALUES (?, ?, ?, ?, ?)`;
-            db.query(assignmentQuery, [courseId, assignmentFile.originalname, 'Uploaded assignment', relativeAssignmentPath, dueDate], (err) => {
+            const assignmentQuery = `INSERT INTO assignments (course_id, title, description, file_path, due_date, maximum_grade) VALUES (?, ?, ?, ?, ?, ?)`; // Include maximum_grade
+            db.query(assignmentQuery, [courseId, assignmentFile.originalname, 'Uploaded assignment', relativeAssignmentPath, dueDate, maximumGrade], (err) => { // Include maximumGrade in the query
                 if (err) {
                     console.error('Error saving assignment:', err);
                     return db.rollback(() => {
@@ -1059,6 +1060,36 @@ app.post('/api/remove-assignment', checkLoggedIn, (req, res) => {
                 });
             });
         });
+    });
+});
+
+// API endpoint to get all student submissions for a specific assignment with user details
+app.get('/api/all-student-submissions-by-assignment', checkLoggedIn, (req, res) => {
+    const assignmentId = req.query.assignmentId;
+    if (!assignmentId) {
+        return res.status(400).send('Missing assignment id');
+    }
+    const query = `
+        SELECT
+            s.student_id,
+            s.full_name AS student_name,
+            a.title AS submission_title,
+            ass.file_path,
+            ass.submission_date,
+            ass.grade,
+            ass.submission_id
+        FROM
+            assignment_submissions ass
+        INNER JOIN assignments a ON ass.assignment_id = a.assignment_id
+        INNER JOIN students s ON ass.student_id = s.student_id
+        WHERE a.assignment_id = ?;
+    `;
+    db.query(query, [assignmentId], (err, results) => {
+        if (err) {
+            console.error('Error fetching all student submissions:', err);
+            return res.status(500).send('Error fetching student submissions');
+        }
+        res.json(results);
     });
 });
 

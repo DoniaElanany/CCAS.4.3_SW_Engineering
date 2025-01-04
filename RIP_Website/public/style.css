@@ -1390,8 +1390,11 @@
   align-items: center;
   padding: 10px;
   margin-bottom: 50px;
-  max-width: 800px;
+  max-width: 80%; 
+  margin-left: auto; 
+  margin-right: auto; 
 }
+
 
 .steps-wrapper {
   display: contents;
@@ -1499,6 +1502,14 @@
   padding-left: 20px;
 }
 
+#assignments-list li:hover {
+  background-color: #fbf1eb;
+}
+
+#assignments-list li::marker {
+  margin-left: -10px;
+}
+
 #assignments-list li {
   margin-bottom: 10px;
   padding: 10px;
@@ -1509,16 +1520,30 @@
   align-items: baseline;
   margin-left: 5px;
   padding-left: 10px;
+  flex-wrap: wrap; 
 }
 
-#assignments-list li:hover {
-  background-color: #fbf1eb;
+#assignments-list li > span { 
+  margin-right: 15px; 
+  white-space: nowrap; 
+  display: inline-block; 
 }
 
-#assignments-list li::marker {
-  margin-left: -10px;
+#assignments-list li > form {
+    margin-left: auto; 
 }
 
-#assignments-list li a {
-  display: block;
+#assignments-list li > a {
+    margin-right: 15px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+#assignments-list li .submission-list {
+  margin-top: 20px; 
+}
+
+#assignments-list li > p { 
+  margin-left: 15px;
+  display: inline-block;
 }
