@@ -49,7 +49,7 @@ Before you begin, make sure you have the following installed on your system:
         });
         ```
 
-4.  **Email Configuration:**
+<!-- 4.  **Email Configuration:**
 
     -   Update your Gmail credentials for sending emails (e.g. password reset and payment confirmation) in the `sendResetEmail` and `sendInvoiceEmail` functions of the `server.js`:
 
@@ -63,8 +63,8 @@ Before you begin, make sure you have the following installed on your system:
          });
         ```
         
-        **NOTE**: You may need to enable "less secure app access" in your Gmail account settings, or preferably create an app password if using 2FA.
-5. **Database Setup**
+        **NOTE**: You may need to enable "less secure app access" in your Gmail account settings, or preferably create an app password if using 2FA. -->
+4. **Database Setup**
     - Before running the project, you'll need to set up the database schema. Run the following SQL queries in your MySQL database to create the necessary tables: 
 
         ```sql 
