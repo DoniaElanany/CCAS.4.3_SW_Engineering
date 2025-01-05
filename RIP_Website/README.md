@@ -63,7 +63,7 @@ Before you begin, make sure you have the following installed on your system:
         `reset_token_expiry` datetime DEFAULT NULL,
         PRIMARY KEY (`student_id`),
         UNIQUE KEY `email` (`email`)
-        )
+        );
 
         CREATE TABLE `instructors` (
         `instructor_id` int NOT NULL AUTO_INCREMENT,
@@ -75,7 +75,7 @@ Before you begin, make sure you have the following installed on your system:
         `reset_token_expiry` datetime DEFAULT NULL,
         PRIMARY KEY (`instructor_id`),
         UNIQUE KEY `email` (`email`)
-        )
+        );
 
         CREATE TABLE `courses` (
         `course_id` int NOT NULL AUTO_INCREMENT,
@@ -86,7 +86,7 @@ Before you begin, make sure you have the following installed on your system:
         PRIMARY KEY (`course_id`),
         KEY `instructor_id` (`instructor_id`),
         CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`instructor_id`)
-        )
+        );
 
         CREATE TABLE `enrollments` (
         `enrollment_id` int NOT NULL AUTO_INCREMENT,
@@ -98,7 +98,7 @@ Before you begin, make sure you have the following installed on your system:
         KEY `course_id` (`course_id`),
         CONSTRAINT `enrollments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`),
         CONSTRAINT `enrollments_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`)
-        ) 
+        ); 
 
         CREATE TABLE `payments_invoices` (
         `student_id` int NOT NULL,
@@ -109,7 +109,7 @@ Before you begin, make sure you have the following installed on your system:
         `billing_address` text NOT NULL,
         `payment_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (`transaction_id`)
-        ) 
+        ); 
 
         CREATE TABLE `learning_materials` (
         `material_id` int NOT NULL AUTO_INCREMENT,
@@ -120,7 +120,7 @@ Before you begin, make sure you have the following installed on your system:
         PRIMARY KEY (`material_id`),
         KEY `course_id` (`course_id`),
         CONSTRAINT `learning_materials_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`)
-        ) 
+        ); 
 
         CREATE TABLE `assignments` (
         `assignment_id` int NOT NULL AUTO_INCREMENT,
@@ -132,7 +132,7 @@ Before you begin, make sure you have the following installed on your system:
         PRIMARY KEY (`assignment_id`),
         KEY `course_id` (`course_id`),
         CONSTRAINT `assignments_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`)
-        ) 
+        ); 
 
         CREATE TABLE `assignment_submissions` (
         `submission_id` int NOT NULL AUTO_INCREMENT,
