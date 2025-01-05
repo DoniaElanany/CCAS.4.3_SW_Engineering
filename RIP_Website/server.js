@@ -774,7 +774,7 @@ app.get('/api/course-details', checkLoggedIn, (req, res) => {
                 });
             }
             // Get the assignments for a given course
-            const assignmentQuery = `SELECT assignment_id, title, file_path, due_date, maximum_grade FROM assignments WHERE course_id = ?`; // Include maximum_grade
+            const assignmentQuery = `SELECT assignment_id, title, file_path, due_date, maximum_grade FROM assignments WHERE course_id = ?`;
             db.query(assignmentQuery, [courseId], (err, assignments) => {
                 if (err) {
                     console.error('Error fetching assignments:', err);
@@ -820,7 +820,7 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
     const materialFile = req.files && req.files['material'] ? req.files['material'][0] : null;
     const assignmentFile = req.files && req.files['assignment'] ? req.files['assignment'][0] : null;
     const dueDate = req.body['due_date'];
-    const maximumGrade = req.body['maximum_grade']; // Get the maximum grade
+    const maximumGrade = req.body['maximum_grade'];
 
     if (!courseId) {
         return res.status(400).send('Course ID is required');
@@ -850,8 +850,8 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
         // Insert assignment if a file is present
         if (assignmentFile) {
             const relativeAssignmentPath = path.relative(__dirname, assignmentFile.path);
-            const assignmentQuery = `INSERT INTO assignments (course_id, title, file_path, due_date, maximum_grade) VALUES (?, ?, ?, ?, ?)`; // Include maximum_grade
-            db.query(assignmentQuery, [courseId, assignmentFile.originalname, relativeAssignmentPath, dueDate, maximumGrade], (err) => { // Include maximumGrade in the query
+            const assignmentQuery = `INSERT INTO assignments (course_id, title, file_path, due_date, maximum_grade) VALUES (?, ?, ?, ?, ?)`;
+            db.query(assignmentQuery, [courseId, assignmentFile.originalname, relativeAssignmentPath, dueDate, maximumGrade], (err) => { 
                 if (err) {
                     console.error('Error saving assignment:', err);
                     return db.rollback(() => {
