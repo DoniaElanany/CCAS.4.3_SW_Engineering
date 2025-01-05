@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <link rel="stylesheet" href="reset.css" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="icon" href="/favicon_io/favicon.ico">
+    <link rel="icon" href="favicon.ico">
 </head>
 
 <body>
@@ -149,7 +149,8 @@
                         coursesContainer.appendChild(noCoursesMessage);
                         return;
                     }
-
+                    
+                    counter = 1;
                     // Loop through courses and create course cards
                     for (const course of courses) {
                         console.log('Processing course:', course);
@@ -162,7 +163,7 @@
                         courseCard.classList.add('course-card');
 
                         const courseTitle = document.createElement('h3');
-                        courseTitle.textContent = `Course ${course.course_id}: ${course.course_name}`;
+                        courseTitle.textContent = `Course ${counter}: ${course.course_name}`;
                         courseCard.appendChild(courseTitle);
 
                         const courseDescription = document.createElement('p');
@@ -212,7 +213,7 @@
                         enrollButton.appendChild(enrollBtn);
                         courseCard.appendChild(enrollButton);
                         coursesContainer.appendChild(courseCard);
-
+                        counter++;
                     }
                     // Add event listeners to enroll/go to course buttons
                     const enrollButtons = document.querySelectorAll('.btn-enroll');

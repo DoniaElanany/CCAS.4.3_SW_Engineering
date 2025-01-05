@@ -223,9 +223,9 @@ Here's a breakdown of the main API endpoints in `server.js`:
     -   Can upload and remove assignments.
     -   Can view student submissions and grade them.
     -   Can remove graded assignments and student submissions
-    -  Can remove course learning materials
+    -   Can remove course learning materials
 -   **Both**:
-    -    Can log in using email and password
-    -    Can update profile information
-    -    Can reset their passwords
+    -   Can log in using email and password
+    -   Can update profile information
+    -   Can reset their passwords
 

@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         courseItem.classList.add('course-item-update');
                         courseItem.id = `course-${course.course_id}`;
                         const courseName = document.createElement('span');
-                        courseName.textContent = `${course.course_id} ${course.course_name}`;
+                        courseName.textContent = `${course.course_name}`;
                         courseName.classList.add('course-name');
                         const removeButton = document.createElement('button');
                         removeButton.textContent = '✖';
@@ -274,7 +274,7 @@ fetch('/api/profile')
             // Creates a list item for each of the enrolled courses
             courses.forEach(course => {
                 const li = document.createElement('li');
-                li.textContent = `${course.course_id} - ${course.course_name}`; // Display course details
+                li.textContent = `${course.course_name}`; // Display course details
                 courseList.appendChild(li);
             });
         }

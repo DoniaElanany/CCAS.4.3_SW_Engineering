@@ -675,8 +675,7 @@ function sendInvoiceEmail(studentId, courseId, courseName, amount, transactionId
   <p>Dear Student,</p>
   <p>Thank you for enrolling in the course. Below are your payment and enrollment details:</p>
   <ul>
-    <li><strong>Course ID:</strong> ${courseId}</li>
-     <li><strong>Course Name:</strong> ${courseName}</li>
+    <li><strong>Course Name:</strong> ${courseName}</li>
     <li><strong>Amount Paid:</strong> $${amount}</li>
     <li><strong>Transaction ID:</strong> ${transactionId}</li>
   </ul>
