@@ -766,7 +766,7 @@ app.get('/api/course-details', checkLoggedIn, (req, res) => {
         }
         const courseDetails = results[0];
         // Get the learning materials for a given course
-        const materialQuery = `SELECT material_id, title, description, file_path FROM learning_materials WHERE course_id = ?`;
+        const materialQuery = `SELECT material_id, title, file_path FROM learning_materials WHERE course_id = ?`;
         db.query(materialQuery, [courseId], (err, materials) => {
             if (err) {
                 console.error('Error fetching learning materials:', err);
@@ -775,7 +775,7 @@ app.get('/api/course-details', checkLoggedIn, (req, res) => {
                 });
             }
             // Get the assignments for a given course
-            const assignmentQuery = `SELECT assignment_id, title, description, file_path, due_date, maximum_grade FROM assignments WHERE course_id = ?`; // Include maximum_grade
+            const assignmentQuery = `SELECT assignment_id, title, file_path, due_date, maximum_grade FROM assignments WHERE course_id = ?`; // Include maximum_grade
             db.query(assignmentQuery, [courseId], (err, assignments) => {
                 if (err) {
                     console.error('Error fetching assignments:', err);
@@ -838,7 +838,7 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
         // Insert learning material if a file is present
         if (materialFile) {
             const relativeMaterialPath = path.relative(__dirname, materialFile.path);
-            const materialQuery = `INSERT INTO learning_materials (course_id, title, description, file_path) VALUES (?, ?, ?, ?)`;
+            const materialQuery = `INSERT INTO learning_materials (course_id, title, file_path) VALUES (?, ?, ?, ?)`;
             db.query(materialQuery, [courseId, materialFile.originalname, 'Uploaded material', relativeMaterialPath], (err) => {
                 if (err) {
                     console.error('Error saving learning material:', err);
@@ -851,7 +851,7 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
         // Insert assignment if a file is present
         if (assignmentFile) {
             const relativeAssignmentPath = path.relative(__dirname, assignmentFile.path);
-            const assignmentQuery = `INSERT INTO assignments (course_id, title, description, file_path, due_date, maximum_grade) VALUES (?, ?, ?, ?, ?, ?)`; // Include maximum_grade
+            const assignmentQuery = `INSERT INTO assignments (course_id, title, file_path, due_date, maximum_grade) VALUES (?, ?, ?, ?, ?, ?)`; // Include maximum_grade
             db.query(assignmentQuery, [courseId, assignmentFile.originalname, 'Uploaded assignment', relativeAssignmentPath, dueDate, maximumGrade], (err) => { // Include maximumGrade in the query
                 if (err) {
                     console.error('Error saving assignment:', err);

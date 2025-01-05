@@ -101,7 +101,6 @@ Before you begin, make sure you have the following installed on your system:
         ) 
 
         CREATE TABLE `payments_invoices` (
-        `id` int NOT NULL AUTO_INCREMENT,
         `student_id` int NOT NULL,
         `course_id` int NOT NULL,
         `amount` decimal(10,2) NOT NULL,
@@ -116,7 +115,6 @@ Before you begin, make sure you have the following installed on your system:
         `material_id` int NOT NULL AUTO_INCREMENT,
         `course_id` int DEFAULT NULL,
         `title` varchar(255) NOT NULL,
-        `description` text,
         `file_path` varchar(255) DEFAULT NULL,
         `upload_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (`material_id`),
@@ -128,7 +126,6 @@ Before you begin, make sure you have the following installed on your system:
         `assignment_id` int NOT NULL AUTO_INCREMENT,
         `course_id` int DEFAULT NULL,
         `title` varchar(255) NOT NULL,
-        `description` text,
         `due_date` timestamp NULL DEFAULT NULL,
         `maximum_grade` int DEFAULT NULL,
         `file_path` varchar(255) DEFAULT NULL,
