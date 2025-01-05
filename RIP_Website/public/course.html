@@ -62,13 +62,13 @@
             <br />
             <div style="margin-bottom: 15px;"></div>
             <div id="assignment-details" style="display:none;">
-            <label for="due-date" class="body-large">Due Date</label>
-            <input type="datetime-local" id="due-date" name="due-date" class="input" />
-             <br />
-            <div style="margin-bottom: 15px;"></div>
-            <label for="maximum-grade" class="body-large">Maximum Grade</label>
-            <input type="number" id="maximum-grade" name="maximum_grade" class="input" />
-            <br />
+              <label for="due-date" class="body-large">Due Date</label>
+              <input type="datetime-local" id="due-date" name="due-date" class="input" />
+              <br />
+              <div style="margin-bottom: 15px;"></div>
+              <label for="maximum-grade" class="body-large">Maximum Grade</label>
+              <input type="number" id="maximum-grade" name="maximum_grade" class="input" />
+              <br />
             </div>
             <button type="button" onclick="uploadMaterialAndAssignments()" class="button-filled">Upload</button>
           </form>
@@ -152,66 +152,78 @@
           } else {
             document.getElementById('instructor-controls').style.display = 'none';
           }
-
-          // Display learning materials
+          // Display learning materials and assignments
           const learningMaterialsList = document.getElementById('learning-materials-list');
-          learningMaterialsList.innerHTML = '';
-          console.log("Learning Materials", course.learningMaterials);
-          if (course.learningMaterials && course.learningMaterials.length > 0) {
-            course.learningMaterials.forEach(material => {
-              console.log('Material Object:', material);
-              const listItem = document.createElement('li');
-              const materialLink = document.createElement('a');
-              materialLink.href = material.file_path ? `/${material.file_path}` : '#';
-              materialLink.textContent = material.title;
-              if (material.file_path) {
-                materialLink.textContent = material.title;
-              } else {
-                materialLink.textContent = `${material.title} (No File Uploaded)`;
-              }
-              listItem.appendChild(materialLink);
-              if (role === 'instructor' && course.instructor_id === userId) {
-                const removeButton = document.createElement('button');
-                removeButton.textContent = 'Remove';
-                removeButton.classList.add('button-outline');
-                removeButton.addEventListener('click', () => {
-                  console.log("Removing material with ID:", material.material_id);
-                  removeMaterial(material.material_id);
-                });
-                listItem.appendChild(removeButton);
-              }
-              learningMaterialsList.appendChild(listItem);
-            });
-          } else {
-            learningMaterialsList.textContent = "No learning materials available for this course.";
-          }
-
-          // Display assignments
           const assignmentsList = document.getElementById('assignments-list');
+          learningMaterialsList.innerHTML = '';
           assignmentsList.innerHTML = '';
-          if (course.assignments && course.assignments.length > 0) {
-            studentId = await getStudentId()
-            course.assignments.forEach(assignment => {
-              const listItem = document.createElement('li');
-              if (assignment.file_path) {
-                const dueDateString = assignment.due_date ? new Date(assignment.due_date).toLocaleString('en-GB') : 'No Due Date';
-                listItem.innerHTML = `<span><a href="/${assignment.file_path}">${assignment.title}</a></span><span> Due Date: ${dueDateString}</span><span> Maximum Grade: ${assignment.maximum_grade}</span>`
-              } else {
-                const dueDateString = assignment.due_date ? new Date(assignment.due_date).toLocaleString('en-GB') : 'No Due Date';
-                listItem.innerHTML = `<span>${assignment.title} (No File Uploaded)</span><span> Due Date: ${dueDateString}</span><span> Maximum Grade: ${assignment.maximum_grade}</span>`;              }
-              assignmentsList.appendChild(listItem);
+          if (role === 'student' && !course.isEnrolled) {
+            const accessDeniedMessage = document.createElement('li');
+            accessDeniedMessage.textContent = "Enroll now to gain access to course content!"
+            learningMaterialsList.appendChild(accessDeniedMessage)
 
-              if (role === 'instructor' && course.instructor_id === userId) {
-                // Fetch student submissions for this assignment
-                fetch(`/api/all-student-submissions-by-assignment?assignmentId=${assignment.assignment_id}`)
-                  .then(response => response.json())
-                  .then(submissions => {
-                    if (submissions && submissions.length > 0) {
-                      const submissionsList = document.createElement('ul');
-                      submissionsList.classList.add('submission-list');
-                      submissions.forEach(submission => {
-                        const submissionItem = document.createElement('li');
-                        submissionItem.innerHTML = `
+            const enrollButton = document.createElement('button');
+            enrollButton.textContent = 'Enroll Now';
+            enrollButton.classList.add('button-filled');
+            enrollButton.addEventListener('click', () => {
+              window.location.href = `/payment?course_id=${courseId}`
+            });
+            learningMaterialsList.appendChild(enrollButton);
+          } else {
+            // Display learning materials
+            if (course.learningMaterials && course.learningMaterials.length > 0) {
+              course.learningMaterials.forEach(material => {
+                console.log('Material Object:', material);
+                const listItem = document.createElement('li');
+                const materialLink = document.createElement('a');
+                materialLink.href = material.file_path ? `/${material.file_path}` : '#';
+                materialLink.textContent = material.title;
+                if (material.file_path) {
+                  materialLink.textContent = material.title;
+                } else {
+                  materialLink.textContent = `${material.title} (No File Uploaded)`;
+                }
+                listItem.appendChild(materialLink);
+                if (role === 'instructor' && course.instructor_id === userId) {
+                  const removeButton = document.createElement('button');
+                  removeButton.textContent = 'Remove';
+                  removeButton.classList.add('button-outline');
+                  removeButton.addEventListener('click', () => {
+                    console.log("Removing material with ID:", material.material_id);
+                    removeMaterial(material.material_id);
+                  });
+                  listItem.appendChild(removeButton);
+                }
+                learningMaterialsList.appendChild(listItem);
+              });
+            } else {
+              learningMaterialsList.textContent = "No learning materials available for this course.";
+            }
+            // Display assignments
+            if (course.assignments && course.assignments.length > 0) {
+              studentId = await getStudentId()
+              course.assignments.forEach(assignment => {
+                const listItem = document.createElement('li');
+                if (assignment.file_path) {
+                  const dueDateString = assignment.due_date ? new Date(assignment.due_date).toLocaleString('en-GB') : 'No Due Date';
+                  listItem.innerHTML = `<span><a href="/${assignment.file_path}">${assignment.title}</a></span><span> Due Date: ${dueDateString}</span><span> Maximum Grade: ${assignment.maximum_grade}</span>`
+                } else {
+                  const dueDateString = assignment.due_date ? new Date(assignment.due_date).toLocaleString('en-GB') : 'No Due Date';
+                  listItem.innerHTML = `<span>${assignment.title} (No File Uploaded)</span><span> Due Date: ${dueDateString}</span><span> Maximum Grade: ${assignment.maximum_grade}</span>`;
+                }
+                assignmentsList.appendChild(listItem);
+
+                if (role === 'instructor' && course.instructor_id === userId) {
+                  // Fetch student submissions for this assignment
+                  fetch(`/api/all-student-submissions-by-assignment?assignmentId=${assignment.assignment_id}`)
+                    .then(response => response.json())
+                    .then(submissions => {
+                      if (submissions && submissions.length > 0) {
+                        const submissionsList = document.createElement('ul');
+                        submissionsList.classList.add('submission-list');
+                        submissions.forEach(submission => {
+                          const submissionItem = document.createElement('li');
+                          submissionItem.innerHTML = `
                             <span>Student ID: ${submission.student_id}</span>
                             <span>Student Name: ${submission.student_name}</span>
                             <span>Submission: <a href="/${submission.file_path}">${submission.submission_title}</a></span>
@@ -226,69 +238,70 @@
                             </form>
                                `;
 
-                        submissionsList.appendChild(submissionItem);
-                      });
-                      listItem.appendChild(submissionsList);
-                    } else {
-                      const noSubmissionMessage = document.createElement('p');
-                      noSubmissionMessage.textContent = 'No submissions for this assignment yet';
-                      listItem.appendChild(noSubmissionMessage);
-                    }
+                          submissionsList.appendChild(submissionItem);
+                        });
+                        listItem.appendChild(submissionsList);
+                      } else {
+                        const noSubmissionMessage = document.createElement('p');
+                        noSubmissionMessage.textContent = 'No submissions for this assignment yet';
+                        listItem.appendChild(noSubmissionMessage);
+                      }
 
+                    });
+                  const removeButton = document.createElement('button');
+                  removeButton.textContent = 'Remove';
+                  removeButton.classList.add('button-outline');
+                  removeButton.addEventListener('click', () => {
+                    removeAssignment(assignment.assignment_id);
                   });
-                const removeButton = document.createElement('button');
-                removeButton.textContent = 'Remove';
-                removeButton.classList.add('button-outline');
-                removeButton.addEventListener('click', () => {
-                  removeAssignment(assignment.assignment_id);
-                });
-                listItem.appendChild(removeButton)
-              }
-              else {
-                fetch(`/api/student-submissions?studentId=${studentId}&courseId=${courseId}`)
-                  .then(response => response.json())
-                  .then(studentSubmissions => {
-                    const submission = studentSubmissions.find(sub => sub.assignment_id === assignment.assignment_id);
-                    if (submission) {
-                      const submissionLink = document.createElement('a');
-                      const grade = document.createElement('span');
-                      grade.textContent = ` Grade: ${submission.grade || 'Not Graded'}`;
-                      submissionLink.href = `/${submission.file_path}`;
-                      submissionLink.textContent = `Submitted: ${submission.submission_title}`;
-                      listItem.appendChild(submissionLink);
-                      listItem.appendChild(grade);
-                      const removeButton = document.createElement('button');
-                      removeButton.textContent = 'Remove Submission';
-                      removeButton.classList.add('button-outline')
-                      removeButton.addEventListener('click', () => {
-                        removeSubmission(assignment.assignment_id, studentId);
-                      });
-                      listItem.appendChild(removeButton);
-                    } else {
-                      const submissionForm = document.createElement('form');
-                      submissionForm.enctype = "multipart/form-data"
-                      submissionForm.id = `submission-form-${assignment.assignment_id}`;
-                      const fileInput = document.createElement('input');
-                      fileInput.type = 'file';
-                      fileInput.name = 'submission';
-                      fileInput.accept = ".pdf,.doc,.docx";
-                      fileInput.classList.add('input')
-                      submissionForm.appendChild(fileInput)
-                      const submitButton = document.createElement('button')
-                      submitButton.textContent = "Submit Assignment"
-                      submitButton.classList.add('button-filled');
-                      submitButton.type = "button"
-                      submitButton.addEventListener('click', () => {
-                        submitAssignment(assignment.assignment_id, submissionForm)
-                      });
-                      submissionForm.appendChild(submitButton);
-                      listItem.appendChild(submissionForm);
-                    }
-                  });
-              }
-            });
-          } else {
-            assignmentsList.textContent = 'No assignments available for this course';
+                  listItem.appendChild(removeButton)
+                }
+                else {
+                  fetch(`/api/student-submissions?studentId=${studentId}&courseId=${courseId}`)
+                    .then(response => response.json())
+                    .then(studentSubmissions => {
+                      const submission = studentSubmissions.find(sub => sub.assignment_id === assignment.assignment_id);
+                      if (submission) {
+                        const submissionLink = document.createElement('a');
+                        const grade = document.createElement('span');
+                        grade.textContent = ` Grade: ${submission.grade || 'Not Graded'}`;
+                        submissionLink.href = `/${submission.file_path}`;
+                        submissionLink.textContent = `Submitted: ${submission.submission_title}`;
+                        listItem.appendChild(submissionLink);
+                        listItem.appendChild(grade);
+                        const removeButton = document.createElement('button');
+                        removeButton.textContent = 'Remove Submission';
+                        removeButton.classList.add('button-outline')
+                        removeButton.addEventListener('click', () => {
+                          removeSubmission(assignment.assignment_id, studentId);
+                        });
+                        listItem.appendChild(removeButton);
+                      } else {
+                        const submissionForm = document.createElement('form');
+                        submissionForm.enctype = "multipart/form-data"
+                        submissionForm.id = `submission-form-${assignment.assignment_id}`;
+                        const fileInput = document.createElement('input');
+                        fileInput.type = 'file';
+                        fileInput.name = 'submission';
+                        fileInput.accept = ".pdf,.doc,.docx";
+                        fileInput.classList.add('input')
+                        submissionForm.appendChild(fileInput)
+                        const submitButton = document.createElement('button')
+                        submitButton.textContent = "Submit Assignment"
+                        submitButton.classList.add('button-filled');
+                        submitButton.type = "button"
+                        submitButton.addEventListener('click', () => {
+                          submitAssignment(assignment.assignment_id, submissionForm)
+                        });
+                        submissionForm.appendChild(submitButton);
+                        listItem.appendChild(submissionForm);
+                      }
+                    });
+                }
+              });
+            } else {
+              assignmentsList.textContent = 'No assignments available for this course';
+            }
           }
         })
         .catch(error => console.error('Error fetching course details:', error));
@@ -331,7 +344,7 @@
       }
       formData.append('course_id', courseId);
       if (assignmentInput.files.length > 0) {
-         formData.append('due_date', dueDateInput.value)
+        formData.append('due_date', dueDateInput.value)
         formData.append('maximum_grade', maximumGradeInput.value);
       }
       try {
@@ -352,13 +365,13 @@
       }
     }
 
-   function toggleAssignmentInputs(input) {
-        const assignmentDetailsDiv = document.getElementById('assignment-details');
-        if (input.files && input.files.length > 0) {
-          assignmentDetailsDiv.style.display = "block";
-        } else {
-            assignmentDetailsDiv.style.display = 'none';
-        }
+    function toggleAssignmentInputs(input) {
+      const assignmentDetailsDiv = document.getElementById('assignment-details');
+      if (input.files && input.files.length > 0) {
+        assignmentDetailsDiv.style.display = "block";
+      } else {
+        assignmentDetailsDiv.style.display = 'none';
+      }
     }
 
     // Function to handle student assignment submission
