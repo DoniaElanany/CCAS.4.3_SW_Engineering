@@ -108,7 +108,7 @@ Before you begin, make sure you have the following installed on your system:
         `card_number` varchar(16) NOT NULL,
         `billing_address` text NOT NULL,
         `payment_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (`id`)
+        PRIMARY KEY (`transaction_id`)
         ) 
 
         CREATE TABLE `learning_materials` (
