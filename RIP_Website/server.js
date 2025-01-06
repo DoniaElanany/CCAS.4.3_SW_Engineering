@@ -741,6 +741,9 @@ app.get('/course', checkLoggedIn, (req, res) => {
 // API endpoint to fetch course details
 app.get('/api/course-details', checkLoggedIn, (req, res) => {
     const courseId = req.query.course_id;
+    const userId = req.session.userId;
+    const role = req.session.role;
+
     if (!courseId) {
         return res.status(400).send('Course ID is required');
     }
@@ -764,33 +767,25 @@ app.get('/api/course-details', checkLoggedIn, (req, res) => {
             });
         }
         const courseDetails = results[0];
-        // Get the learning materials for a given course
-        const materialQuery = `SELECT material_id, title, file_path FROM learning_materials WHERE course_id = ?`;
-        db.query(materialQuery, [courseId], (err, materials) => {
-            if (err) {
-                console.error('Error fetching learning materials:', err);
-                return res.status(500).json({
-                    error: 'Error fetching learning materials'
-                });
-            }
-            // Get the assignments for a given course
-            const assignmentQuery = `SELECT assignment_id, title, file_path, due_date, maximum_grade FROM assignments WHERE course_id = ?`;
-            db.query(assignmentQuery, [courseId], (err, assignments) => {
+
+
+        // Check if the student is enrolled
+        let isEnrolled = false;
+        if (role === 'student') {
+            const enrollmentCheckQuery = 'SELECT * FROM enrollments WHERE student_id = ? AND course_id = ?';
+            db.query(enrollmentCheckQuery, [userId, courseId], (err, enrollmentResults) => {
                 if (err) {
-                    console.error('Error fetching assignments:', err);
+                    console.error('Error checking enrollment:', err);
                     return res.status(500).json({
-                        error: 'Error fetching assignments'
+                         error: 'Error checking enrollment status',
                     });
                 }
-                // Send course details, materials and assignments
-                res.json({
-                    ...courseDetails,
-                    learningMaterials: materials,
-                    assignments: assignments
-                });
-            })
-
-        });
+                 isEnrolled = enrollmentResults.length > 0;
+                 fetchCourseInfo(isEnrolled, courseDetails, res, courseId)
+            });
+        } else {
+            fetchCourseInfo(isEnrolled, courseDetails, res, courseId);
+        }
     });
 });
 
