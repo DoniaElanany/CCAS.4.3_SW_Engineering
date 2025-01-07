@@ -264,7 +264,6 @@ app.post('/submit-profile-update', checkLoggedIn, (req, res) => {
     const userId = req.session.userId;
     const {
         full_name,
-        email,
         removed_courses,
         role
     } = req.body;
@@ -274,39 +273,55 @@ app.post('/submit-profile-update', checkLoggedIn, (req, res) => {
     }
 
     let updateProfileQuery;
+    let getExistingEmailQuery;
     if (role === 'student') {
         updateProfileQuery = 'UPDATE students SET full_name = ?, email = ? WHERE student_id = ?';
+        getExistingEmailQuery = 'SELECT email FROM students WHERE student_id = ?';
     } else if (role === 'instructor') {
         updateProfileQuery = 'UPDATE instructors SET full_name = ?, email = ? WHERE instructor_id = ?';
+        getExistingEmailQuery = 'SELECT email FROM instructors WHERE instructor_id = ?';
     } else {
         return res.status(400).send('Invalid role');
     }
 
-    // Update profile data
-    db.query(updateProfileQuery, [full_name, email, userId], (err) => {
-        if (err) {
-            return console.error('Error updating profile:', err);
-        }
+    // Get the existing email address
+    db.query(getExistingEmailQuery, [userId], (err, result) => {
+      if (err) {
+          console.error('Error querying database for email:', err);
+          return res.status(500).send('Internal Server Error');
+      }
+      if (result.length === 0) {
+        return res.status(404).send('User not found');
+      }
 
-        // Handle removal of courses from a user's profile
-        if (removed_courses && removed_courses.trim() !== '') {
-            const coursesToRemove = removed_courses.split(',').filter(Boolean);
+      const existingEmail = result[0].email;
 
-            if (coursesToRemove.length > 0) {
-                let removeCoursesQuery;
+       // Update profile data
+      db.query(updateProfileQuery, [full_name, existingEmail, userId], (err) => {
+          if (err) {
+              return console.error('Error updating profile:', err);
+          }
 
-                if (role === 'student') {
-                    const placeholders = coursesToRemove.map(() => '?').join(',');
-                    removeCoursesQuery = `DELETE FROM enrollments WHERE student_id = ? AND course_id IN (${placeholders})`;
-                    db.query(removeCoursesQuery, [userId, ...coursesToRemove], (err) => {
-                        if (err) {
-                            return console.error('Error removing courses from enrollments:', err);
-                        }
-                    });
-                }
-            }
-        }
-        res.redirect('/profile'); // Redirect after updating
+          // Handle removal of courses from a user's profile
+          if (removed_courses && removed_courses.trim() !== '') {
+              const coursesToRemove = removed_courses.split(',').filter(Boolean);
+
+              if (coursesToRemove.length > 0) {
+                  let removeCoursesQuery;
+
+                  if (role === 'student') {
+                      const placeholders = coursesToRemove.map(() => '?').join(',');
+                      removeCoursesQuery = `DELETE FROM enrollments WHERE student_id = ? AND course_id IN (${placeholders})`;
+                      db.query(removeCoursesQuery, [userId, ...coursesToRemove], (err) => {
+                          if (err) {
+                              return console.error('Error removing courses from enrollments:', err);
+                          }
+                      });
+                  }
+              }
+          }
+          res.redirect('/profile'); // Redirect after updating
+      });
     });
 });
 
@@ -472,7 +487,7 @@ app.post('/reset-password', (req, res) => {
         }
 
         if (results.length === 0) {
-            return res.status(400).send('Invalid or expired token');
+            return res.status(400).send('Invalid or expired link');
         }
 
         const {
@@ -499,21 +514,7 @@ app.post('/reset-password', (req, res) => {
                     return res.status(500).send('Internal Server Error');
                 }
 
-                res.send(`
-              <html>
-                  <head>
-                      <title>Password Reset Successful</title>
-                  </head>
-                  <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
-                      <h1>Password Reset Successfully</h1>
-                      <p>You can now log in with your new password.</p>
-                      <a href="/login" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
-                          Go to Login Page
-                      </a>
-                  </body>
-              </html>
-          `);
-
+                res.sendFile(path.join(__dirname, '/public/reset-password-success.html'))
             });
         });
     });
@@ -777,17 +778,48 @@ app.get('/api/course-details', checkLoggedIn, (req, res) => {
                 if (err) {
                     console.error('Error checking enrollment:', err);
                     return res.status(500).json({
-                         error: 'Error checking enrollment status',
+                        error: 'Error checking enrollment status',
                     });
                 }
-                 isEnrolled = enrollmentResults.length > 0;
-                 fetchCourseInfo(isEnrolled, courseDetails, res, courseId)
+                isEnrolled = enrollmentResults.length > 0;
+                fetchCourseInfo(isEnrolled, courseDetails, res, courseId)
             });
         } else {
             fetchCourseInfo(isEnrolled, courseDetails, res, courseId);
         }
     });
 });
+
+function fetchCourseInfo(isEnrolled, courseDetails, res, courseId) {
+    // Get the learning materials for a given course
+    const materialQuery = `SELECT material_id, title, file_path FROM learning_materials WHERE course_id = ?`;
+    db.query(materialQuery, [courseId], (err, materials) => {
+        if (err) {
+            console.error('Error fetching learning materials:', err);
+            return res.status(500).json({
+                error: 'Error fetching learning materials'
+            });
+        }
+        // Get the assignments for a given course
+        const assignmentQuery = `SELECT assignment_id, title, file_path, due_date, maximum_grade FROM assignments WHERE course_id = ?`;
+        db.query(assignmentQuery, [courseId], (err, assignments) => {
+            if (err) {
+                console.error('Error fetching assignments:', err);
+                return res.status(500).json({
+                    error: 'Error fetching assignments'
+                });
+            }
+            // Send course details, materials and assignments
+            res.json({
+                ...courseDetails,
+                learningMaterials: materials,
+                assignments: assignments,
+                isEnrolled
+            });
+
+        })
+    });
+}
 
 // Multer configuration for handling file uploads
 const storage = multer.diskStorage({
@@ -844,9 +876,18 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
         }
         // Insert assignment if a file is present
         if (assignmentFile) {
+            if (dueDate) {
+                const due = new Date(dueDate)
+                const now = new Date();
+                if (due <= now) {
+                    return db.rollback(() => {
+                        res.status(400).send('Due date must be in the future');
+                    })
+                }
+            }
             const relativeAssignmentPath = path.relative(__dirname, assignmentFile.path);
             const assignmentQuery = `INSERT INTO assignments (course_id, title, file_path, due_date, maximum_grade) VALUES (?, ?, ?, ?, ?)`;
-            db.query(assignmentQuery, [courseId, assignmentFile.originalname, relativeAssignmentPath, dueDate, maximumGrade], (err) => { 
+            db.query(assignmentQuery, [courseId, assignmentFile.originalname, relativeAssignmentPath, dueDate, maximumGrade], (err) => {
                 if (err) {
                     console.error('Error saving assignment:', err);
                     return db.rollback(() => {
@@ -935,13 +976,37 @@ app.post('/api/grade-submission', checkLoggedIn, (req, res) => {
         return res.status(400).send('Missing required parameters');
     }
 
-    const query = `UPDATE assignment_submissions SET grade = ? WHERE submission_id = ?`;
-    db.query(query, [grade, submissionId], (err) => {
+    // Fetch the maximum grade for the assignment associated with this submission
+    const getMaxGradeQuery = `
+    SELECT a.maximum_grade
+    FROM assignments a
+    INNER JOIN assignment_submissions s ON a.assignment_id = s.assignment_id
+    WHERE s.submission_id = ?
+`;
+
+    db.query(getMaxGradeQuery, [submissionId], (err, results) => {
         if (err) {
-            console.error('Error grading submission:', err);
+            console.error('Error fetching maximum grade:', err);
             return res.status(500).send('Error grading submission');
         }
-        res.send('Submission graded successfully.');
+
+        if (results.length === 0) {
+            return res.status(404).send('Submission not found');
+        }
+
+        const maximumGrade = results[0].maximum_grade;
+        if (parseInt(grade) > maximumGrade) {
+            return res.status(400).send(`Grade cannot exceed maximum grade of ${maximumGrade}`);
+        }
+
+        const query = `UPDATE assignment_submissions SET grade = ? WHERE submission_id = ?`;
+        db.query(query, [grade, submissionId], (err) => {
+            if (err) {
+                console.error('Error grading submission:', err);
+                return res.status(500).send('Error grading submission');
+            }
+            res.send('Submission graded successfully.');
+        });
     });
 });
 

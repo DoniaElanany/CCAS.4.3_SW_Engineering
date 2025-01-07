@@ -62,10 +62,22 @@
         function validateForm() {
             const expiryDateInput = document.getElementById('expiry-date');
             const expiryDate = expiryDateInput.value;
+            const cvvInput = document.getElementById('cvv');
+            const cvv = cvvInput.value;
+            const cardNumberInput = document.getElementById('card-number');
+            const cardNumber = cardNumberInput.value;
             if (!expiryDate) {
                 alert('Please enter an expiry date.');
                 return false;
             }
+            if (!cvv) {
+                 alert('Please enter a cvv.');
+                  return false;
+             }
+             if (!cardNumber) {
+                 alert('Please enter a card number.');
+                 return false;
+             }
             const [month, year] = expiryDate.split('/').map(Number);
             const expiry = new Date(`20${year}`, month - 1, 1);
 
@@ -74,6 +86,14 @@
                 alert('Expiry date must be in the future.');
                 return false;
             }
+             if (cvv.length < 3 || cvv.length > 4) {
+                 alert('CVV must be 3 or 4 digits.');
+                 return false;
+             }
+             if (cardNumber.length !== 16){
+                alert('Card number must be 16 digits.')
+                return false
+             }
             return true;
         }
         // Event listener to load courses and set up payment form functionality on DOM load
@@ -146,6 +166,7 @@
                 });
         });
     </script>
+ <script defer src="scripts.js"></script>
 </body>
 
 </html>

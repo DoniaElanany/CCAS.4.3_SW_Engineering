@@ -67,7 +67,7 @@
               <br />
               <div style="margin-bottom: 15px;"></div>
               <label for="maximum-grade" class="body-large">Maximum Grade</label>
-              <input type="number" id="maximum-grade" name="maximum_grade" class="input" />
+              <input type="number" id="maximum-grade" name="maximum_grade" class="input"/>
               <br />
             </div>
             <button type="button" onclick="uploadMaterialAndAssignments()" class="button-filled">Upload</button>
@@ -166,7 +166,7 @@
             enrollButton.textContent = 'Enroll Now';
             enrollButton.classList.add('button-filled');
             enrollButton.addEventListener('click', () => {
-              window.location.href = `/payment?course_id=${courseId}`
+            window.location.href = `/payment?course_id=${courseId}`
             });
             learningMaterialsList.appendChild(enrollButton);
           } else {
@@ -230,7 +230,7 @@
                             <span>Submitted: ${new Date(submission.submission_date).toLocaleString('en-GB')}</span>
                             <span>Grade: ${submission.grade || 'Not Graded'}</span>
                             <form id="grade-form-${submission.submission_id}" >
-                                <input type="number" class="input" placeholder="Enter Grade" name="grade" />
+                                <input type="number" class="input" placeholder="Enter Grade" name="grade" min="0"/>
                                 <button type="button" class="button-filled"
                                   onclick="gradeSubmission('${submission.submission_id}', this.closest('form').querySelector('input').value)">
                                       ${submission.grade ? 'Adjust Grade' : 'Grade Submission'}

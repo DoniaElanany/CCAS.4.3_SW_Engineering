@@ -22,15 +22,23 @@ function filterCourses() {
         .then(courses => {
             // Filters the courses based on the search input
             const filteredCourses = courses.filter(course => course.course_name.toLowerCase().includes(searchInput));
-            // Creates a list item for each filtered course and adds it to the course list
-            filteredCourses.forEach(course => {
-                const courseItem = document.createElement("li");
-                const courseLink = document.createElement("a");
-                courseLink.href = `/course?course_id=${course.course_id}`;
-                courseLink.textContent = course.course_name;
-                courseItem.appendChild(courseLink)
-                courseList.appendChild(courseItem);
-            });
+
+            // Check if there are any filtered courses
+             if (filteredCourses.length === 0) {
+                const noResultsMessage = document.createElement('li');
+                noResultsMessage.textContent = "No matching courses found. Please try a different search term.";
+                courseList.appendChild(noResultsMessage);
+            } else {
+                 // Creates a list item for each filtered course and adds it to the course list
+                filteredCourses.forEach(course => {
+                    const courseItem = document.createElement("li");
+                    const courseLink = document.createElement("a");
+                    courseLink.href = `/course?course_id=${course.course_id}`;
+                    courseLink.textContent = course.course_name;
+                    courseItem.appendChild(courseLink)
+                    courseList.appendChild(courseItem);
+                });
+            }
         })
         .catch(error => {
             console.error("Error fetching courses:", error);
@@ -77,6 +85,38 @@ setTimeout(function () {
 
 // Event listener for when the document is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Password matching validation for signup form
+    const signupForm = document.querySelector('.signup-form');
+    if (signupForm) {
+        signupForm.addEventListener('submit', function (e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const errorDisplay = document.getElementById('signup-error');
+
+            if (password !== confirmPassword) {
+                errorDisplay.textContent = 'Passwords do not match';
+                e.preventDefault();
+            } else {
+                errorDisplay.textContent = '';
+            }
+        });
+    }
+
+    // Password matching validation for reset password form
+    const resetPasswordForm = document.querySelector('.reset-password-form');
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', function (e) {
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const errorDisplay = document.getElementById('reset-password-error');
+            if (newPassword !== confirmPassword) {
+                errorDisplay.textContent = 'Passwords do not match';
+                e.preventDefault();
+            } else {
+                errorDisplay.textContent = '';
+            }
+        });
+    }
     // Fetches user ID and role from the server
     fetch('/api/getUserId')
         .then(response => response.json())
@@ -108,17 +148,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('Courses:', courses);
                     // Populate profile update form with user data
                     document.getElementById('full_name').value = user.full_name;
-                    document.getElementById('email').value = user.email;
+                    document.getElementById('email').textContent = user.email;
                     document.getElementById('role').value = role;
                     const courseList = document.getElementById('course-list');
                     // Clear the previous courses listed in update profile
                     courseList.innerHTML = '';
                     // Handle case of no enrolled courses
-                     if (courses.length === 0) {
+                    if (courses.length === 0) {
                         const noCoursesMessage = document.createElement('li');
                         noCoursesMessage.textContent = 'No courses available.';
                         courseList.appendChild(noCoursesMessage);
-                     }
+                    }
 
                     // Creates list item for each course with option to remove
                     courses.forEach((course) => {
@@ -142,12 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         });
 
-                        if (role === 'student'){
-                           courseItem.appendChild(courseName);
-                           courseItem.appendChild(removeButton);
-                           courseList.appendChild(courseItem);
-                        } else{
-                           courseItem.appendChild(courseName);
+                        if (role === 'student') {
+                            courseItem.appendChild(courseName);
+                            courseItem.appendChild(removeButton);
+                            courseList.appendChild(courseItem);
+                        } else {
+                            courseItem.appendChild(courseName);
                             courseList.appendChild(courseItem)
                         }
                     });
