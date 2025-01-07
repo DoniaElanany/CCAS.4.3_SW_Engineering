@@ -869,7 +869,8 @@
 
 .login-btn,
 .payment-btn,
-.update-profile-btn {
+.update-profile-btn,
+.sign-up-btn {
   margin-top: var(--dl-space-space-halfunit);
   font-size: 0.875rem;
   width: 100%;
