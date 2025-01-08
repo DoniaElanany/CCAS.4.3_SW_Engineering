@@ -835,8 +835,8 @@ const upload = multer({
     storage: storage
 });
 
-// API endpoint to handle uploading of course learning materials and assignments
-app.post('/api/upload-material', checkLoggedIn, upload.fields([{
+ // API endpoint to handle uploading of course learning materials and assignments
+ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
     name: 'material',
     maxCount: 1
 }, {
@@ -876,6 +876,11 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
         }
         // Insert assignment if a file is present
         if (assignmentFile) {
+             if (!dueDate) { // Check if due date is present
+                return db.rollback(() => {
+                   return res.status(400).send('Due date is required for assignments');
+                });
+            }
             if (dueDate) {
                 const due = new Date(dueDate)
                 const now = new Date();
@@ -884,6 +889,13 @@ app.post('/api/upload-material', checkLoggedIn, upload.fields([{
                         res.status(400).send('Due date must be in the future');
                     })
                 }
+            }
+             if (maximumGrade !== undefined) {
+              if (isNaN(parseFloat(maximumGrade)) || parseFloat(maximumGrade) < 0) {
+                  return db.rollback(() => {
+                      return res.status(400).send('Enter a positive number for maximum grade');
+                  });
+              }
             }
             const relativeAssignmentPath = path.relative(__dirname, assignmentFile.path);
             const assignmentQuery = `INSERT INTO assignments (course_id, title, file_path, due_date, maximum_grade) VALUES (?, ?, ?, ?, ?)`;
@@ -975,6 +987,10 @@ app.post('/api/grade-submission', checkLoggedIn, (req, res) => {
     if (!submissionId || !grade) {
         return res.status(400).send('Missing required parameters');
     }
+    
+    if (isNaN(parseFloat(grade)) || parseFloat(grade) < 0) {
+            return res.status(400).send('Grade must be a non-negative number');
+        }
 
     // Fetch the maximum grade for the assignment associated with this submission
     const getMaxGradeQuery = `
